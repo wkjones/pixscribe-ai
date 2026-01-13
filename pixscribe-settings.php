@@ -57,7 +57,7 @@ function pixscribe_settings_page() {
           </td>
         </tr>
         <tr valign="top">
-          <th scope="row">Development Enviornment</th>
+          <th scope="row">Development Site</th>
           <td>
             <label>
               <input type="checkbox" name="pixscribe_is_local" value="1" <?php checked(get_option('pixscribe_is_local'), 1); ?> />
