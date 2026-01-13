@@ -11,7 +11,7 @@ function pixscribe_send_api_request($attachment_id) {
     return false;
   }
 
-  $api_url = 'http://localhost:3000/api/wp-upload';
+  $api_url = 'https://pixscribe.dev/api/wp-upload';
   $pixscribe_key = get_option('pixscribe_api_key');
   $focused_keywords = get_option('pixscribe_website_keywords');
 
@@ -62,7 +62,7 @@ function pixscribe_send_api_request($attachment_id) {
   // POST request to Pixscribe API
   $response = wp_remote_post($api_url, [
     'method'  => 'POST',
-    'timeout' => 30,
+    'timeout' => 0.01,
     'headers'  => [
       'Content-Type'  => 'application/json',
       'Authorization' => 'Bearer ' . sanitize_text_field($pixscribe_key),
