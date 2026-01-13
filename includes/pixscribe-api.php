@@ -4,13 +4,14 @@
  */
 
 function pixscribe_send_api_request($attachment_id) {
+
   // Validate attachment ID
   $attachment_id = absint($attachment_id);
   if (!$attachment_id || !get_post($attachment_id)) {
     return false;
   }
 
-  $api_url = 'https://pixscribe.dev/api/wp-upload';
+  $api_url = 'http://localhost:3000/api/wp-upload';
   $pixscribe_key = get_option('pixscribe_api_key');
   $focused_keywords = get_option('pixscribe_website_keywords');
 
@@ -28,8 +29,16 @@ function pixscribe_send_api_request($attachment_id) {
   $page_title = $parent_id ? get_the_title($parent_id) : '';
   $page_description = $parent_id ? get_the_excerpt($parent_id) : '';
 
-  // Check if site is local
-  $is_local = get_option('pixscribe_is_local', 0);
+  // Get file info
+  $file_path = get_attached_file($attachment_id);
+  $file_content = null;
+  if ($file_path && file_exists($file_path)) {
+    $file_content = file_get_contents($file_path);
+    if ($file_content === false) {
+      error_log('Pixscribe: Failed to read file content for attachment ' . $attachment_id);
+      return false;
+    }
+  }
 
   $body = [
     'website_url'   => esc_url(home_url()),
@@ -39,31 +48,18 @@ function pixscribe_send_api_request($attachment_id) {
     'focused_keywords' => sanitize_text_field($focused_keywords),
     'uploaded_by'   => get_current_user_id(),
     'callback_url'  => esc_url_raw(rest_url('media-meta/v1/update')),
-    'is_local'      => (bool) $is_local,
+    'is_local'      => (bool) get_option('pixscribe_is_local', 0),
+    'file_url'      => esc_url_raw($file_url),
+    'file_name'     => $file_path ? basename($file_path) : '',
+    'file_mime_type' => get_post_mime_type($attachment_id) ?: '',
   ];
 
-  // If local, send file content directly; otherwise send URL
-  if ($is_local) {
-    $file_path = get_attached_file($attachment_id);
-    if ($file_path && file_exists($file_path)) {
-      $file_content = file_get_contents($file_path);
-      if ($file_content !== false) {
-        $body['file_content'] = base64_encode($file_content);
-        $body['file_name'] = basename($file_path);
-        $body['file_mime_type'] = get_post_mime_type($attachment_id);
-      } else {
-        error_log('Pixscribe: Failed to read file content for attachment ' . $attachment_id);
-        return false;
-      }
-    } else {
-      error_log('Pixscribe: File not found for attachment ' . $attachment_id);
-      return false;
-    }
-  } else {
-    $body['file_url'] = esc_url_raw($file_url);
+  // Always include file content if available
+  if ($file_content !== null) {
+    $body['file_content'] = base64_encode($file_content);
   }
 
-  // POST request to your backend
+  // POST request to Pixscribe API
   $response = wp_remote_post($api_url, [
     'method'  => 'POST',
     'timeout' => 30,
@@ -82,4 +78,3 @@ function pixscribe_send_api_request($attachment_id) {
 
   return true;
 }
-

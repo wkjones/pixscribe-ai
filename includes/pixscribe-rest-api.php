@@ -17,7 +17,15 @@ add_action('rest_api_init', function () {
   register_rest_route('media-meta/v1', '/generate', [
     'methods'             => 'POST',
     'callback'            => 'media_meta_generate',
-    'permission_callback' => function () {
+    'permission_callback' => function (WP_REST_Request $request) {
+      return current_user_can('upload_files');
+    },
+  ]);
+
+  register_rest_route('media-meta/v1', '/get', [
+    'methods'             => 'GET',
+    'callback'            => 'media_meta_get',
+    'permission_callback' => function (WP_REST_Request $request) {
       return current_user_can('upload_files');
     },
   ]);
@@ -64,5 +72,28 @@ function media_meta_generate(WP_REST_Request $request) {
   }
 
   return new WP_REST_Response(['success' => true, 'message' => 'Metadata generation started']);
+}
+
+function media_meta_get(WP_REST_Request $request) {
+  $attachment_id = intval($request->get_param('attachment_id'));
+
+  if (!$attachment_id) {
+    return new WP_REST_Response(['error' => 'Missing attachment_id'], 400);
+  }
+
+  $attachment = get_post($attachment_id);
+  if (!$attachment) {
+    return new WP_REST_Response(['error' => 'Attachment not found'], 404);
+  }
+
+  return new WP_REST_Response([
+    'success' => true,
+    'data' => [
+      'alt_text' => get_post_meta($attachment_id, '_wp_attachment_image_alt', true),
+      'title' => $attachment->post_title,
+      'caption' => $attachment->post_excerpt,
+      'description' => $attachment->post_content,
+    ],
+  ]);
 }
 

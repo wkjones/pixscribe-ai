@@ -16,12 +16,48 @@
           $actions.append($btn);
         }
 
+        // Auto-poll for newly uploaded images
+        this.autoPollIfNeeded();
+
         return this;
+      },
+
+      autoPollIfNeeded: function () {
+        const model = this.model;
+        const id = model.get('id');
+        const mime = model.get('mime') || model.get('type') || '';
+
+        // Only poll for images
+        if (!mime.startsWith('image/')) {
+          return;
+        }
+
+        // Check if metadata is empty (likely just uploaded)
+        const hasEmptyMetadata =
+          !model.get('alt') &&
+          !model.get('title') &&
+          !model.get('caption') &&
+          !model.get('description');
+
+        // Only auto-poll if metadata is empty and not already polling
+        if (
+          hasEmptyMetadata &&
+          !window.PixscribeMetadataPoller.activePolls[id]
+        ) {
+          const self = this;
+          window.PixscribeMetadataPoller.poll(id, model, null, {
+            onSuccess: function () {
+              // Refresh the view when metadata is updated
+              self.render();
+            },
+          });
+        }
       },
 
       generateMetadata: function () {
         const id = this.model.get('id');
         const $btn = this.$el.find('.pixscribe-generate');
+        const self = this;
         $btn.text('Generating...').prop('disabled', true);
 
         wp.apiRequest({
@@ -30,13 +66,12 @@
           data: { attachment_id: id },
         })
           .done(() => {
-            $btn
-              .text('Generating...')
-              .delay(1500)
-              .queue(function (next) {
-                $(this).text('Run Pixscribe').prop('disabled', false);
-                next();
-              });
+            window.PixscribeMetadataPoller.poll(id, this.model, $btn, {
+              onSuccess: function () {
+                // Refresh the view when metadata is updated
+                self.render();
+              },
+            });
           })
           .fail((err) => {
             console.error(err);
@@ -51,6 +86,44 @@
       },
     });
   }
+
+  // Extend the base Attachment view for auto-polling in grid/list views
+  wp.media.view.Attachment = wp.media.view.Attachment.extend({
+    render: function () {
+      wp.media.view.Attachment.__super__.render.apply(this, arguments);
+      this.autoPollIfNeeded();
+      return this;
+    },
+
+    autoPollIfNeeded: function () {
+      const model = this.model;
+      const id = model.get('id');
+      const mime = model.get('mime') || model.get('type') || '';
+
+      // Only poll for images
+      if (!mime.startsWith('image/')) {
+        return;
+      }
+
+      // Check if metadata is empty (likely just uploaded)
+      const hasEmptyMetadata =
+        !model.get('alt') &&
+        !model.get('title') &&
+        !model.get('caption') &&
+        !model.get('description');
+
+      // Only auto-poll if metadata is empty and not already polling
+      if (hasEmptyMetadata && !window.PixscribeMetadataPoller.activePolls[id]) {
+        const self = this;
+        window.PixscribeMetadataPoller.poll(id, model, null, {
+          onSuccess: function () {
+            // Refresh the view when metadata is updated
+            self.render();
+          },
+        });
+      }
+    },
+  });
 
   wp.media.view.Attachment.Details.TwoColumn = attachPixscribeButton(
     wp.media.view.Attachment.Details.TwoColumn

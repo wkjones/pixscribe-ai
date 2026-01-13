@@ -21,9 +21,17 @@ add_action('admin_enqueue_scripts', function ($hook) {
   }
 
   wp_enqueue_script(
+    'pixscribe-poll-metadata',
+    plugin_dir_url(dirname(__FILE__)) . 'pixscribe-poll-metadata.js',
+    ['jquery', 'wp-api-request'],
+    '1.0.0',
+    true
+  );
+
+  wp_enqueue_script(
     'pixscribe-generate-meta',
     plugin_dir_url(dirname(__FILE__)) . 'pixscribe-generate-meta.js',
-    ['jquery', 'media-views', 'wp-api-request'],
+    ['jquery', 'media-views', 'wp-api-request', 'pixscribe-poll-metadata'],
     '1.0.0',
     true
   );
