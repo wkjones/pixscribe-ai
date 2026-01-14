@@ -3,6 +3,21 @@
  * Pixscribe API Functions
  */
 
+/**
+ * Get the base API URL
+ */
+function pixscribe_get_api_base_url() {
+  return 'https://pixscribe.dev';
+}
+
+/**
+ * Get the API URL for a specific endpoint
+ */
+function pixscribe_get_api_url($endpoint) {
+  $base_url = pixscribe_get_api_base_url();
+  return trailingslashit($base_url) . ltrim($endpoint, '/');
+}
+
 function pixscribe_send_api_request($attachment_id) {
 
   // Validate attachment ID
@@ -11,8 +26,17 @@ function pixscribe_send_api_request($attachment_id) {
     return false;
   }
 
-  $api_url = 'https://pixscribe.dev/api/wp-upload';
+  // Determine upload endpoint based on local setting
+  if (get_option('pixscribe_is_local')) {
+    $api_url = pixscribe_get_api_url('api/wp/local-upload');
+  } else {
+    $api_url = pixscribe_get_api_url('api/wp/remote-upload');
+  }
+
+  // Get the API key
   $pixscribe_key = get_option('pixscribe_api_key');
+
+  // Get the focused keywords
   $focused_keywords = get_option('pixscribe_website_keywords');
 
   if (!$pixscribe_key) {
@@ -52,12 +76,8 @@ function pixscribe_send_api_request($attachment_id) {
     'file_url'      => esc_url_raw($file_url),
     'file_name'     => $file_path ? basename($file_path) : '',
     'file_mime_type' => get_post_mime_type($attachment_id) ?: '',
+    'file_content' => base64_encode($file_content),
   ];
-
-  // Always include file content if available
-  if ($file_content !== null) {
-    $body['file_content'] = base64_encode($file_content);
-  }
 
   // POST request to Pixscribe API
   $response = wp_remote_post($api_url, [
@@ -74,6 +94,11 @@ function pixscribe_send_api_request($attachment_id) {
   if (is_wp_error($response)) {
     error_log("Pixscribe: API request failed - " . $response->get_error_code());
     return false;
+  }
+
+  if (get_option('pixscribe_is_local')) {
+    // Start polling for status
+    pixscribe_start_status_polling($attachment_id);
   }
 
   return true;

@@ -18,7 +18,13 @@ add_action('rest_api_init', function () {
     'methods'             => 'POST',
     'callback'            => 'media_meta_generate',
     'permission_callback' => function (WP_REST_Request $request) {
-      return current_user_can('upload_files');
+      // Verify nonce from header (wp.apiRequest sends this automatically)
+      $nonce = $request->get_header('X-WP-Nonce');
+      if ($nonce && wp_verify_nonce($nonce, 'wp_rest')) {
+        return current_user_can('upload_files');
+      }
+      // Fallback: check if user is logged in via cookies
+      return is_user_logged_in() && current_user_can('upload_files');
     },
   ]);
 
@@ -26,7 +32,13 @@ add_action('rest_api_init', function () {
     'methods'             => 'GET',
     'callback'            => 'media_meta_get',
     'permission_callback' => function (WP_REST_Request $request) {
-      return current_user_can('upload_files');
+      // Verify nonce from header (wp.apiRequest sends this automatically)
+      $nonce = $request->get_header('X-WP-Nonce');
+      if ($nonce && wp_verify_nonce($nonce, 'wp_rest')) {
+        return current_user_can('upload_files');
+      }
+      // Fallback: check if user is logged in via cookies
+      return is_user_logged_in() && current_user_can('upload_files');
     },
   ]);
 });
