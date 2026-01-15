@@ -65,16 +65,16 @@ function pixscribe_send_api_request($attachment_id) {
   }
 
   $body = [
-    'website_url'   => esc_url(home_url()),
+    'website_url' => esc_url(home_url()),
     'attachment_id' => $attachment_id,
     'page_title' => sanitize_text_field($page_title),
     'page_description' => sanitize_textarea_field($page_description),
     'focused_keywords' => sanitize_text_field($focused_keywords),
-    'uploaded_by'   => get_current_user_id(),
-    'callback_url'  => esc_url_raw(rest_url('media-meta/v1/update')),
-    'is_local'      => (bool) get_option('pixscribe_is_local', 0),
-    'file_url'      => esc_url_raw($file_url),
-    'file_name'     => $file_path ? basename($file_path) : '',
+    'uploaded_by' => get_current_user_id(),
+    'callback_url' => esc_url_raw(rest_url('media-meta/v1/update')),
+    'is_local' => (bool) get_option('pixscribe_is_local', 0),
+    'file_url' => esc_url_raw($file_url),
+    'file_name' => $file_path ? basename($file_path) : '',
     'file_mime_type' => get_post_mime_type($attachment_id) ?: '',
     'file_content' => base64_encode($file_content),
   ];
