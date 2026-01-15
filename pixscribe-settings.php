@@ -61,7 +61,7 @@ function pixscribe_settings_page() {
           <td>
             <label>
               <input type="checkbox" name="pixscribe_is_local" value="1" <?php checked(get_option('pixscribe_is_local'), 1); ?> />
-              Enable if this is a local development environment (files will be sent to API directly)
+              Enable if this is a local development environment (files will be sent to API directly) *Experimental*
             </label>
             <p class="description">
               When enabled, file content will be sent directly to the API since local URLs are not universally accessible on the web.
