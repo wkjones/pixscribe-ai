@@ -10,7 +10,7 @@ function media_upload_api_trigger($attachment_id) {
     return;
   }
 
-  //Run the Pixscribe API request to generate metadata
+  // Run the Pixscribe API request to generate metadata
   pixscribe_send_api_request($attachment_id);
 }
 add_action('add_attachment', 'media_upload_api_trigger');
