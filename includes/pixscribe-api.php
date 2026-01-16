@@ -4,7 +4,7 @@
  */
 
 function pixscribe_get_api_base_url() {
-  return 'https://pixscribe.dev';
+  return 'http://localhost:3000';
 }
 
 function pixscribe_get_api_url($endpoint) {
@@ -103,13 +103,13 @@ function pixscribe_build_request_body($attachment_id, $attachment_data) {
   return [
     'website_url'        => esc_url(home_url()),
     'attachment_id'      => $attachment_id,
-    'page_title'         => sanitize_text_field(get_the_title($parent_id) ?: ''),
-    'page_description'   => sanitize_textarea_field(get_the_excerpt($parent_id) ?: ''),
-    'focused_keywords'   => sanitize_text_field(get_option('pixscribe_website_keywords') ?: ''),
-    'callback_url'       => esc_url_raw(rest_url('media-meta/v1/update')),
     'file_url'           => esc_url_raw($attachment_data['file_url']),
     'file_name'          => $attachment_data['file_name'],
     'file_mime_type'     => $attachment_data['file_mime_type'],
     'file_content'       => base64_encode($attachment_data['file_content']),
+    'page_title'         => sanitize_text_field(get_the_title($parent_id) ?: ''),
+    'page_description'   => sanitize_textarea_field(get_the_excerpt($parent_id) ?: ''),
+    'focused_keywords'   => sanitize_text_field(get_option('pixscribe_website_keywords') ?: ''),
+    'callback_url'       => esc_url_raw(rest_url('media-meta/v1/update')),
   ];
 }
