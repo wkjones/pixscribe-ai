@@ -25,7 +25,7 @@ add_action('admin_enqueue_scripts', function ($hook) {
   // Enqueue the generate metadata script
   wp_enqueue_script(
     'pixscribe-generate-meta',
-    plugin_dir_url(dirname(__FILE__)) . 'pixscribe-generate-meta.js',
+    plugin_dir_url(dirname(__FILE__)) . '/js/pixscribe-generate-meta.js',
     ['jquery', 'media-views', 'wp-api-request'],
     '1.0.0',
     true

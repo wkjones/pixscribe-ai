@@ -34,9 +34,7 @@ function pixscribe_settings_page() {
   <div class="wrap">
     <h1>Pixscribe Settings</h1>
     <form method="post" action="options.php">
-      <?php
-      settings_fields('pixscribe');
-      ?>
+      <?php settings_fields('pixscribe'); ?>
       <table class="form-table">
         <tr valign="top">
           <th scope="row">Pixscribe API Key</th>
@@ -61,7 +59,7 @@ function pixscribe_settings_page() {
           <td>
             <label>
               <input type="checkbox" name="pixscribe_is_local" value="1" <?php checked(get_option('pixscribe_is_local'), 1); ?> />
-              Enable if this is a local development environment (files will be sent to API directly) *Experimental*
+              Enable if this is a local development environment (files will be sent to API directly)
             </label>
             <p class="description">
               When enabled, file content will be sent directly to the API since local URLs are not universally accessible on the web.
@@ -71,7 +69,15 @@ function pixscribe_settings_page() {
       </table>
       <?php submit_button(); ?>
     </form>
+    <h2>Batch Process Missing Alt Text</h2>
+    <button id="pixscribe-batch-button" class="button button-primary">
+      Process Missing Alt Text
+    </button>
+    <div id="pixscribe-batch-confirm" style="margin-top: 15px;"></div>
+    <div id="pixscribe-batch-status" style="display: none; margin-top: 15px; padding: 10px; background: #f5f5f5; border-radius: 4px;"></div>
   </div>
   <?php
 }
+
+
 

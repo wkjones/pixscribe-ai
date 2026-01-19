@@ -4,7 +4,7 @@
  */
 
 function pixscribe_get_api_base_url() {
-  return 'https://pixscribe.dev';
+  return 'http://localhost:3000';
 }
 
 function pixscribe_get_api_url($endpoint) {
