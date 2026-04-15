@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: Pixscribe
- * Description: Sends a request to a backend API when a file is uploaded to the Media Library.
+ * Description: Connects WordPress sites with the Pixscribe.dev API to generate metadata for images.
  * Version: 1.0
- * Author: West Jones
+ * Author: Pixscribe
  */
 
 // Include plugin files

@@ -4,7 +4,7 @@
  */
 
 function pixscribe_get_api_base_url() {
-  return 'https://pixscribe.dev';
+  return 'http://localhost:3000';
 }
 
 function pixscribe_get_api_url($endpoint) {
@@ -12,8 +12,10 @@ function pixscribe_get_api_url($endpoint) {
   return trailingslashit($base_url) . ltrim($endpoint, '/');
 }
 
-function pixscribe_send_api_request($attachment_id) {
+function pixscribe_send_api_request($attachment_id, $args = []) {
   $attachment_id = absint($attachment_id);
+  $args = is_array($args) ? $args : [];
+  $blocking = !empty($args['blocking']);
   
   // Validate attachment exists
   if (!$attachment_id || !get_post($attachment_id)) {
@@ -44,7 +46,7 @@ function pixscribe_send_api_request($attachment_id) {
   // Send request
   $response = wp_remote_post($api_url, [
     'method'    => 'POST',
-    'timeout'   => 0.01,
+    'timeout'   => 2,
     'headers'   => [
       'Content-Type'  => 'application/json',
       'Authorization' => 'Bearer ' . sanitize_text_field($pixscribe_key),
@@ -54,7 +56,7 @@ function pixscribe_send_api_request($attachment_id) {
   ]);
 
   if (is_wp_error($response)) {
-    error_log('Pixscribe: API request failed - ' . $response->get_error_code());
+    error_log('Pixscribe: API request failed - ' . $response->get_error_message());
     return false;
   }
 
