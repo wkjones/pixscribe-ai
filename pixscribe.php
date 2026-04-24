@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Pixscribe
  * Description: Connects WordPress sites with the Pixscribe.dev API to generate metadata for images.
- * Version: 1.0
+ * Version: 1.0.2
  * Author: Pixscribe
  */
 
